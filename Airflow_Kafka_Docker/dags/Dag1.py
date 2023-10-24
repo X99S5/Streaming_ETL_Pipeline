@@ -8,9 +8,13 @@ from time import sleep
 
 def topic_message():
     topic_name = 'topic_a'
-    producer = KafkaProducer( bootstrap_servers=['localhost:9092'], value_serializer=lambda x:dumps(x).encode('utf-8'))
+    producer = KafkaProducer( bootstrap_servers=['kafka1:29092'], value_serializer=lambda x:dumps(x).encode('utf-8'))
     
-
+    for i in range(100):
+        data = {'Packet': i}
+        producer.send( topic_name, value = data)
+        sleep(3)
+        
 default_args = {
     'owner' : 'me9',
     'retries' : 5,

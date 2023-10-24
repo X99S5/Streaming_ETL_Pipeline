@@ -82,8 +82,58 @@ x-airflow-common:
       condition: service_healthy
 
 services:
+
+  zookeeper:
+    image: wurstmeister/zookeeper
+    container_name: zookeeper
+    ports:
+      - "2181:2181"
+    networks:
+      - airflow_kafka_net 
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+  
+
+  kafka1:
+    image: wurstmeister/kafka
+    container_name: kafka1
+    ports:
+      - "9092:9092"
+    networks:
+      - airflow_kafka_net  
+    # depends_on:
+    #   - zookeeper
+    
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181    
+      KAFKA_LISTENERS: INTERNAL1://kafka1:29092, CLIENT1://localhost:9092          #Defines the ips that are listening in for connections
+      KAFKA_ADVERTISED_LISTENERS: INTERNAL1://kafka1:29092, CLIENT1://localhost:9092  #Defines the ips that are advertised for external clients to connect to , NOTE: you need to put even the internal listener here even if it makes no sense why it is defined as an external when it is going to be used as an internal.
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: INTERNAL1:PLAINTEXT,CLIENT1:PLAINTEXT  
+      KAFKA_INTER_BROKER_LISTENER_NAME: INTERNAL1                                 #Defines the Listener used for internal communication within the cluster.
+      #KAFKA_BOOTSTRAP_SERVERS: localhost:9092  # adding more local hosts doesnt work
+     
+  kafka2:
+    image: wurstmeister/kafka
+    container_name: kafka2
+    ports:
+      - "9093:9093"                                     #Means exposing port on my host machine
+    # depends_on:
+    #   - zookeeper
+    networks:
+      - airflow_kafka_net
+    environment:
+      KAFKA_BROKER_ID: 2
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181    
+      KAFKA_LISTENERS: INTERNAL2://kafka2:29093, CLIENT2://localhost:9093           
+      KAFKA_ADVERTISED_LISTENERS: INTERNAL2://kafka2:29093, CLIENT2://localhost:9093   
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: INTERNAL2:PLAINTEXT,CLIENT2:PLAINTEXT  
+      KAFKA_INTER_BROKER_LISTENER_NAME: INTERNAL2
+    
   postgres:
     image: postgres:13
+    networks:
+      - airflow_kafka_net
     environment:
       POSTGRES_USER: airflow
       POSTGRES_PASSWORD: airflow
@@ -104,6 +154,8 @@ services:
     command: webserver
     ports:
       - "8080:8080"
+    networks:
+      - airflow_kafka_net
     healthcheck:
       test: ["CMD", "curl", "--fail", "http://localhost:8080/health"]
       interval: 30s
@@ -119,6 +171,8 @@ services:
   airflow-scheduler:
     <<: *airflow-common
     command: scheduler
+    networks:
+      - airflow_kafka_net
     healthcheck:
       test: ["CMD", "curl", "--fail", "http://localhost:8974/health"]
       interval: 30s
@@ -135,6 +189,8 @@ services:
   airflow-triggerer:
     <<: *airflow-common
     command: triggerer
+    networks:
+      - airflow_kafka_net
     healthcheck:
       test: ["CMD-SHELL", 'airflow jobs check --job-type TriggererJob --hostname "$${HOSTNAME}"']
       interval: 30s
@@ -151,6 +207,8 @@ services:
     <<: *airflow-common
     entrypoint: /bin/bash
     # yamllint disable rule:line-length
+    networks:
+      - airflow_kafka_net
     command:
       - -c
       - |
@@ -229,6 +287,8 @@ services:
     <<: *airflow-common
     profiles:
       - debug
+    networks:
+      - airflow_kafka_net
     environment:
       <<: *airflow-common-env
       CONNECTION_CHECK_MAX_COUNT: "0"
@@ -245,3 +305,16 @@ services:
 
 volumes:
   postgres-db-volume:
+
+
+networks:
+  airflow_kafka_net:
+    driver: bridge
+
+#====================================Start a producer on kafka1 and consumer on kafka2=====================================================
+# opt/kafka_2.13-2.8.1/bin/kafka-topics.sh --create --topic topic_a --bootstrap-server kafka1:29092 --partitions 1 --replication-factor 1                   on kafka 2
+# opt/kafka_2.13-2.8.1/bin/kafka-console-consumer.sh --bootstrap-server kafka1:29092 --topic topic_a                                                        on kafka 2
+# opt/kafka_2.13-2.8.1/bin/kafka-console-producer.sh --broker-list kafka1:29092,kafka2:29093 --topic topic_a                                                on kafka 1
+# opt/kafka_2.13-2.8.1/bin/kafka-topics.sh --list --bootstrap-server kafka1:29092
+
+#cd Documents/Data_Engineering_Project/Kafka_Docker
