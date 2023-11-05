@@ -6,12 +6,14 @@ from kafka import KafkaProducer
 from json import dumps
 from time import sleep
 
+
+
 def topic_message():
     topic_name = 'topic_a'
     producer = KafkaProducer( bootstrap_servers=['kafka1:29092'], value_serializer=lambda x:dumps(x).encode('utf-8'))
     
     for i in range(100):
-        data = {'Packet': i}
+        data = {'Packet'+str(i): i}
         producer.send( topic_name, value = data)
         sleep(3)
         
@@ -27,7 +29,8 @@ with DAG(
     default_args = default_args,
     description = 'DAG #1',
     start_date = datetime(2023,10,23, 11, 13, 0),
-    schedule_interval = '@daily'
+    schedule_interval = '@daily',
+    catchup = False
     
 ) as dag:
     task1 = PythonOperator(
