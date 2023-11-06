@@ -19,9 +19,14 @@ spark = SparkSession.builder.master("local[*]").appName("MySparkApp") \
 df = spark.readStream.format("kafka").option("kafka.bootstrap.servers", "kafka1:29092 ,kafka2:29093").option("subscribe", "topic_a").option("startingOffsets", "earliest").load()
 
 
-df2 = df.selectExpr("CAST(key AS STRING)", "CAST(value AS STRING)")
+df = df.selectExpr('CAST(key AS STRING)', 'CAST(value AS STRING)')
 
-query = df2.writeStream \
+#df.createOrReplaceTempView("my_streaming_table")
+
+# You can now run SQL queries on the temporary table
+#df = spark.sql("SELECT * FROM my_streaming_table")
+
+query = df.writeStream \
     .outputMode("append") \
     .format("console") \
     .start()

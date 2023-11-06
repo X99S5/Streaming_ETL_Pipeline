@@ -10,11 +10,11 @@ from time import sleep
 
 def topic_message():
     topic_name = 'topic_a'
-    producer = KafkaProducer( bootstrap_servers=['kafka1:29092'], value_serializer=lambda x:dumps(x).encode('utf-8'))
+    producer = KafkaProducer( bootstrap_servers=['kafka1:29092'], value_serializer=lambda x:dumps(x).encode('utf-8') , key_serializer=lambda x:dumps(x).encode('utf-8'))
     
-    for i in range(100):
-        data = {'Packet'+str(i): i}
-        producer.send( topic_name, value = data)
+    for i in range(50):
+
+        producer.send( topic_name, value = i , key = 'Packet'+str(i) )
         sleep(3)
         
 default_args = {
