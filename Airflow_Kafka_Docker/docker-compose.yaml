@@ -161,6 +161,7 @@ services:
       <<: *airflow-common-depends-on
       airflow-init:
         condition: service_completed_successfully
+  
 
   airflow-scheduler:
     <<: *airflow-common
@@ -301,6 +302,7 @@ volumes:
 # opt/kafka_2.13-2.8.1/bin/kafka-topics.sh --list --bootstrap-server kafka1:29092
 # opt/kafka_2.13-2.8.1/bin/kafka-topics.sh --describe --bootstrap-server kafka1:29092
 # opt/kafka_2.13-2.8.1/bin/kafka-consumer-groups.sh --list --bootstrap-server kafka1:29092
+
 
 
 #docker exec -u root -it airflow_kafka_docker-airflow-webserver-1 /bin/bash       command to get into root of airflow

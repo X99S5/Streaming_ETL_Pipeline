@@ -5,7 +5,7 @@ from datetime import datetime,timedelta
 from kafka import KafkaProducer
 from json import dumps
 from time import sleep
-
+from datetime import datetime
 
 
 def topic_message():
@@ -13,8 +13,8 @@ def topic_message():
     producer = KafkaProducer( bootstrap_servers=['kafka1:29092'], value_serializer=lambda x:dumps(x).encode('utf-8') , key_serializer=lambda x:dumps(x).encode('utf-8'))
     
     for i in range(50):
-
-        producer.send( topic_name, value = i , key = 'Packet'+str(i) )
+       
+        producer.send( topic_name, value = i , key = topic_name , timestamp_ms= int((datetime.utcnow() - datetime(1970, 1, 1)).total_seconds() * 1000) )
         sleep(3)
         
 default_args = {
