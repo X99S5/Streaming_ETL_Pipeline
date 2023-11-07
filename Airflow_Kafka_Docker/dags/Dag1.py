@@ -12,10 +12,10 @@ def topic_message():
     topic_name = 'topic_a'
     producer = KafkaProducer( bootstrap_servers=['kafka1:29092'], value_serializer=lambda x:dumps(x).encode('utf-8') , key_serializer=lambda x:dumps(x).encode('utf-8'))
     
-    for i in range(50):
+    for i in range(20):
        
         producer.send( topic_name, value = i , key = topic_name , timestamp_ms= int((datetime.utcnow() - datetime(1970, 1, 1)).total_seconds() * 1000) )
-        sleep(3)
+        sleep(0.5)
         
 default_args = {
     'owner' : 'me9',

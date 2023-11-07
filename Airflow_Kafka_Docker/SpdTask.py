@@ -31,13 +31,22 @@ df = df.withColumn("value", col("value").cast("double"))
 
 #Multiplying by 10
 #df = df.withColumn("value", col("value") * 1)
-# Does a running sum
-df = df.agg(sum("value").alias("total_value"))
+
+# Orders data into 1 second interval
+
+windowed_streaming_df = df.withColumn(
+    "window",
+    window(col("timestamp"), "1 seconds")
+)
+
+#Runs the data
+result_df = windowed_streaming_df.groupBy("window").agg({"value": "sum"})
+
 #Change key to date
 df.printSchema()
 print(df.printSchema())
 
-query = df.writeStream \
+query = result_df.writeStream \
     .outputMode("update") \
     .format("console") \
     .option("truncate", "false") \
