@@ -20,6 +20,9 @@ spark = SparkSession.builder.master("local[*]").appName("MySparkApp") \
 .config('spark.jars','/home/airflow/.local/lib/python3.8/site-packages/pyspark/jars/commons-pool2-2.12.0.jar') \
 .getOrCreate()
 
+spark.sparkContext.setLogLevel("ERROR") #Stop info spam causing lag
+
+
 df = spark.readStream.format("kafka").option("kafka.bootstrap.servers", "kafka1:29092").option("subscribe", "topic_a").option("startingOffsets", "earliest").option("includeHeaders", "true").load()
 
 # Selects the keys and values and Casts them to string from bytes
@@ -36,20 +39,21 @@ df = df.withColumn("value", col("value").cast("double"))
 
 windowed_streaming_df = df.withColumn(
     "window",
-    window(col("timestamp"), "1 seconds")
+    window(col("timestamp"), " 0.1 seconds")
 )
 
 #Runs the data
-result_df = windowed_streaming_df.groupBy("window").agg({"value": "sum"})
+result_df = windowed_streaming_df.groupBy('window').agg({'value': 'sum'}).orderBy('window')
 
 #Change key to date
 df.printSchema()
 print(df.printSchema())
 
 query = result_df.writeStream \
-    .outputMode("update") \
+    .outputMode("complete") \
     .format("console") \
     .option("truncate", "false") \
+    .option("numRows", 300) \
     .start()
 
 

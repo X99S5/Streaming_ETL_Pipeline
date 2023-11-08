@@ -98,36 +98,78 @@ services:
     ports:
       - "9092:9092"
     environment:
-      
       KAFKA_BROKER_ID: 1
       KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181    
-      KAFKA_LISTENERS: INTERNAL1://kafka1:29092, CLIENT1://localhost:9092          #Defines the ips that are listening in for connections
-      KAFKA_ADVERTISED_LISTENERS: INTERNAL1://kafka1:29092, CLIENT1://localhost:9092  #Defines the ips that are advertised for external clients to connect to , NOTE: you need to put even the internal listener here even if it makes no sense why it is defined as an external when it is going to be used as an internal.
-      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: INTERNAL1:PLAINTEXT,CLIENT1:PLAINTEXT  
-      KAFKA_INTER_BROKER_LISTENER_NAME: INTERNAL1                                 #Defines the Listener used for internal communication within the cluster.
-      #KAFKA_BOOTSTRAP_SERVERS: localhost:9092  # adding more local hosts doesnt work
+      KAFKA_LISTENERS: INTERNAL://kafka1:29092, CLIENT://localhost:9092          #Defines the ips that are listening in for connections
+      KAFKA_ADVERTISED_LISTENERS: INTERNAL://kafka1:29092, CLIENT://localhost:9092  #Defines the ips that are advertised for external clients to connect to , NOTE: you need to put even the internal listener here even if it makes no sense why it is defined as an external when it is going to be used as an internal.
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: INTERNAL:PLAINTEXT,CLIENT:PLAINTEXT  
+      KAFKA_INTER_BROKER_LISTENER_NAME: INTERNAL                                 #Defines the Listener used for internal communication within the cluster.
+      
+      #KAFKA_BOOTSTRAP_SERVERS : INTERNAL2://kafka2:29093 
+      
      
   kafka2:
     image: wurstmeister/kafka:latest
     container_name: kafka2
     ports:
       - "9093:9093"                                     #Means exposing port on my host machine
-    # depends_on:
-    #   - zookeeper
-    healthcheck:
-      test: ["CMD", "opt/kafka_2.13-2.8.1/bin/kafka-console-consumer.sh --bootstrap-server kafka1:29092 --topic topic_a", "--fail", "http://localhost:9093/health"]
-      interval: 30s
-      timeout: 15s
-      retries: 1
     environment:
       KAFKA_BROKER_ID: 2
       KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181    
-      KAFKA_LISTENERS: INTERNAL2://kafka2:29093, CLIENT2://localhost:9093           
-      KAFKA_ADVERTISED_LISTENERS: INTERNAL2://kafka2:29093, CLIENT2://localhost:9093   
-      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: INTERNAL2:PLAINTEXT,CLIENT2:PLAINTEXT  
-      KAFKA_INTER_BROKER_LISTENER_NAME: INTERNAL2
-      KAFKA_BOOTSTRAP_SERVERS: INTERNAL1://kafka1:29092
-    
+      KAFKA_LISTENERS: INTERNAL://kafka2:29093, CLIENT://localhost:9093           
+      KAFKA_ADVERTISED_LISTENERS: INTERNAL://kafka2:29093, CLIENT://localhost:9093   
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: INTERNAL:PLAINTEXT,CLIENT:PLAINTEXT  
+      KAFKA_INTER_BROKER_LISTENER_NAME: INTERNAL
+      
+      
+      
+      
+
+  kafka3:
+    image: wurstmeister/kafka:latest
+    container_name: kafka3
+    ports:
+      - "9094:9094"
+    environment:
+      KAFKA_BROKER_ID: 3
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181    
+      KAFKA_LISTENERS: INTERNAL://kafka3:29094, CLIENT://localhost:9094           
+      KAFKA_ADVERTISED_LISTENERS: INTERNAL://kafka3:29094, CLIENT://localhost:9094   
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: INTERNAL:PLAINTEXT,CLIENT:PLAINTEXT  
+      KAFKA_INTER_BROKER_LISTENER_NAME: INTERNAL
+      
+      
+
+  kafka4:
+    image: wurstmeister/kafka:latest
+    container_name: kafka4
+    ports:
+      - "9095:9095"
+    environment:
+      KAFKA_BROKER_ID: 4
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181    
+      KAFKA_LISTENERS: INTERNAL://kafka4:29095, CLIENT://localhost:9095           
+      KAFKA_ADVERTISED_LISTENERS: INTERNAL://kafka4:29095, CLIENT://localhost:9095   
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: INTERNAL:PLAINTEXT,CLIENT:PLAINTEXT  
+      KAFKA_INTER_BROKER_LISTENER_NAME: INTERNAL
+      
+      
+
+  kafka5:
+    image: wurstmeister/kafka:latest
+    container_name: kafka5
+    ports:
+      - "9096:9096"
+    environment:
+      KAFKA_BROKER_ID: 5
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181    
+      KAFKA_LISTENERS: INTERNAL://kafka5:29096, CLIENT://localhost:9096           
+      KAFKA_ADVERTISED_LISTENERS: INTERNAL://kafka5:29096, CLIENT://localhost:9096   
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: INTERNAL:PLAINTEXT,CLIENT:PLAINTEXT  
+      KAFKA_INTER_BROKER_LISTENER_NAME: INTERNAL
+      #KAFKA_METADATA_MAX_AGE_MS : 10000
+      
+
   postgres:
     image: postgres:13
     environment:
@@ -296,7 +338,7 @@ volumes:
 
 
 #====================================Start a producer on kafka1 and consumer on kafka2=====================================================
-# opt/kafka_2.13-2.8.1/bin/kafka-topics.sh --create --topic topic_a --bootstrap-server kafka1:29092 --partitions 1 --replication-factor 1                   on kafka 2
+# opt/kafka_2.13-2.8.1/bin/kafka-topics.sh --create --topic topic_a --bootstrap-server kafka1:29092,kafka2:29093,kafka3:29094,kafka4:29095,kafka5:29096 --partitions 10 --replication-factor 1                   on kafka 2
 # opt/kafka_2.13-2.8.1/bin/kafka-console-consumer.sh --bootstrap-server kafka1:29092 --topic topic_a                                                        on kafka 2
 # opt/kafka_2.13-2.8.1/bin/kafka-console-producer.sh --broker-list kafka1:29092,kafka2:29093 --topic topic_a                                                on kafka 1
 # opt/kafka_2.13-2.8.1/bin/kafka-topics.sh --list --bootstrap-server kafka1:29092
@@ -307,4 +349,5 @@ volumes:
 
 #docker exec -u root -it airflow_kafka_docker-airflow-webserver-1 /bin/bash       command to get into root of airflow
 
-#cd Documents/Data_Engineering_Project/Kafka_Docker
+# opt/kafka_2.13-2.8.1/bin/kafka-topics.sh --create --topic topic_a --bootstrap-server kafka1:29092 --partitions 10 --replication-factor 1
+# opt/kafka_2.13-2.8.1/bin/kafka-topics.sh --create --topic topic_adb --bootstrap-server kafka2:29093 --partitions 10 --replication-factor 1

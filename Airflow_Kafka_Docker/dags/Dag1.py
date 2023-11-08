@@ -14,8 +14,8 @@ def topic_message():
     
     for i in range(20):
        
-        producer.send( topic_name, value = i , key = topic_name , timestamp_ms= int((datetime.utcnow() - datetime(1970, 1, 1)).total_seconds() * 1000) )
-        sleep(0.5)
+        producer.send( topic_name, value = i , key = i%10 , timestamp_ms= int((datetime.utcnow() - datetime(1970, 1, 1)).total_seconds() * 1000) )
+        sleep(0.05)
         
 default_args = {
     'owner' : 'me9',
