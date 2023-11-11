@@ -4,7 +4,7 @@ This project involves building an ETL pipeline which is orchestrated with airflo
 
 Data is generated and sent to a Kafka cluster via kafka-python . The data is then extracted by pyspark which runs a summing aggregation on the data and outputs to console.
 
-# Setup
+## Setup
 #1) Build the main image<br> 
      -> docker build . --tag extending_airflow:latest<br>
 
