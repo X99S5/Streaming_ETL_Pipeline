@@ -17,7 +17,7 @@ Data is generated and sent to a Kafka cluster via kafka-python . The data is the
 #4) In any kafka container bash shell , run the command to create a topic with 10 partitions<br> 
      -> opt/kafka_2.13-2.8.1/bin/kafka-topics.sh --create --topic topic_a --bootstrap-server kafka1:29092 --partitions 10 --replication-factor 1<br>
 
-#5) Wait for airflow to startup , then copy your pyspark code to the airflow schedular and triggerer for it to run<br> 
+#5) Wait for airflow to startup , then copy the pyspark code to the airflow schedular and triggerer for it to run<br> 
      -> docker cp ./SpdTask.py airflow_kafka_docker-airflow-triggerer-1:/opt<br>
      -> docker cp ./SpdTask.py airflow_kafka_docker-airflow-scheduler-1:/opt<br>
     
