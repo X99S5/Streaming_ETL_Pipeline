@@ -1,11 +1,5 @@
 FROM apache/airflow:2.7.1
 
-# Download and install Apache Spark
-# USER root
-# WORKDIR /opt
-# RUN curl -O https://dlcdn.apache.org/spark/spark-3.5.0/spark-3.5.0-bin-hadoop3-scala2.13.tgz
-# RUN tar -xzvf spark-3.5.0-bin-hadoop3-scala2.13.tgz && mv spark-3.5.0-bin-hadoop3-scala2.13 spark
-
 # Install wget and other necessary tools
 USER root
 RUN apt-get update && apt-get install -y wget
