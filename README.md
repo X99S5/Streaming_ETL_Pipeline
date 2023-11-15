@@ -1,4 +1,4 @@
-# Data-Engineering-Project-1
+# Data-Engineering-Project
 
 This project involves building an ETL pipeline which is orchestrated with airflow and run via docker containers.
 
